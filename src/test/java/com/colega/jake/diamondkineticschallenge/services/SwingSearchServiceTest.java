@@ -1,8 +1,6 @@
 package com.colega.jake.diamondkineticschallenge.services;
 
-import com.colega.jake.diamondkineticschallenge.exceptions.InvalidIndicesException;
-import com.colega.jake.diamondkineticschallenge.exceptions.InvalidThresholdsException;
-import com.colega.jake.diamondkineticschallenge.exceptions.InvalidWinLengthException;
+import com.colega.jake.diamondkineticschallenge.exceptions.InvalidInputException;
 import com.colega.jake.diamondkineticschallenge.models.Swing;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -34,7 +32,7 @@ class SwingSearchServiceTest {
         final int result = swingSearchService.searchContinuityAboveValue(
                 testData,
                 0,
-                testData.length - 1,
+                testData.length,
                 0,
                 1
         );
@@ -50,7 +48,7 @@ class SwingSearchServiceTest {
         final int result = swingSearchService.searchContinuityAboveValue(
                 testData,
                 0,
-                testData.length - 1,
+                testData.length,
                 -1,
                 1
         );
@@ -66,7 +64,7 @@ class SwingSearchServiceTest {
         final int result = swingSearchService.searchContinuityAboveValue(
                 testData,
                 0,
-                testData.length - 1,
+                testData.length,
                 1,
                 1
         );
@@ -82,7 +80,7 @@ class SwingSearchServiceTest {
         final int result = swingSearchService.searchContinuityAboveValue(
                 testData,
                 0,
-                testData.length - 1,
+                testData.length,
                 1.1,
                 1
         );
@@ -98,7 +96,7 @@ class SwingSearchServiceTest {
         final int result = swingSearchService.searchContinuityAboveValue(
                 testData,
                 0,
-                testData.length - 1,
+                testData.length,
                 999,
                 1
         );
@@ -114,7 +112,7 @@ class SwingSearchServiceTest {
         final int result = swingSearchService.searchContinuityAboveValue(
                 testData,
                 0,
-                testData.length - 1,
+                testData.length,
                 0,
                 1
         );
@@ -144,12 +142,12 @@ class SwingSearchServiceTest {
         final double[] testData = testSwing.getAcceleratorXData();
 
         assertThrows(
-                InvalidWinLengthException.class,
+                InvalidInputException.class,
                 () ->
                         swingSearchService.searchContinuityAboveValue(
                                 testData,
                                 0,
-                                testData.length - 1,
+                                testData.length,
                                 0,
                                 0
                         )
@@ -162,12 +160,12 @@ class SwingSearchServiceTest {
         final double[] testData = testSwing.getAcceleratorXData();
 
         assertThrows(
-                InvalidWinLengthException.class,
+                InvalidInputException.class,
                 () ->
                         swingSearchService.searchContinuityAboveValue(
                                 testData,
                                 0,
-                                testData.length - 1,
+                                testData.length,
                                 0,
                                 -1
                         )
@@ -180,12 +178,12 @@ class SwingSearchServiceTest {
         final double[] testData = testSwing.getAcceleratorXData();
 
         assertThrows(
-                InvalidWinLengthException.class,
+                InvalidInputException.class,
                 () ->
                         swingSearchService.searchContinuityAboveValue(
                                 testData,
                                 0,
-                                testData.length - 1,
+                                testData.length,
                                 0,
                                 testData.length + 1
                         )
@@ -198,12 +196,12 @@ class SwingSearchServiceTest {
         final double[] testData = testSwing.getAcceleratorXData();
 
         assertThrows(
-                InvalidIndicesException.class,
+                InvalidInputException.class,
                 () ->
                         swingSearchService.searchContinuityAboveValue(
                                 testData,
                                 -1,
-                                testData.length - 1,
+                                testData.length,
                                 0,
                                 1
                         )
@@ -216,12 +214,12 @@ class SwingSearchServiceTest {
         final double[] testData = testSwing.getAcceleratorXData();
 
         assertThrows(
-                InvalidIndicesException.class,
+                InvalidInputException.class,
                 () ->
                         swingSearchService.searchContinuityAboveValue(
                                 testData,
+                                testData.length + 1,
                                 testData.length,
-                                testData.length - 1,
                                 0,
                                 1
                         )
@@ -234,7 +232,7 @@ class SwingSearchServiceTest {
         final double[] testData = testSwing.getAcceleratorXData();
 
         assertThrows(
-                InvalidIndicesException.class,
+                InvalidInputException.class,
                 () ->
                         swingSearchService.searchContinuityAboveValue(
                                 testData,
@@ -252,12 +250,12 @@ class SwingSearchServiceTest {
         final double[] testData = testSwing.getAcceleratorXData();
 
         assertThrows(
-                InvalidIndicesException.class,
+                InvalidInputException.class,
                 () ->
                         swingSearchService.searchContinuityAboveValue(
                                 testData,
                                 0,
-                                testData.length,
+                                testData.length + 1,
                                 0,
                                 1
                         )
@@ -270,7 +268,7 @@ class SwingSearchServiceTest {
         final double[] testData = testSwing.getAcceleratorXData();
 
         assertThrows(
-                InvalidIndicesException.class,
+                InvalidInputException.class,
                 () ->
                         swingSearchService.searchContinuityAboveValue(
                                 testData,
@@ -289,7 +287,7 @@ class SwingSearchServiceTest {
 
         final int result = swingSearchService.backSearchContinuityWithinRange(
                 testData,
-                testData.length - 1,
+                testData.length,
                 0,
                 0,
                 999,
@@ -306,7 +304,7 @@ class SwingSearchServiceTest {
 
         final int result = swingSearchService.backSearchContinuityWithinRange(
                 testData,
-                testData.length - 1,
+                testData.length,
                 0,
                 -999,
                 0,
@@ -323,7 +321,7 @@ class SwingSearchServiceTest {
 
         final int result = swingSearchService.backSearchContinuityWithinRange(
                 testData,
-                testData.length - 1,
+                testData.length,
                 0,
                 -1,
                 999,
@@ -340,7 +338,7 @@ class SwingSearchServiceTest {
 
         final int result = swingSearchService.backSearchContinuityWithinRange(
                 testData,
-                testData.length - 1,
+                testData.length,
                 0,
                 -999,
                 -1,
@@ -357,7 +355,7 @@ class SwingSearchServiceTest {
 
         final int result = swingSearchService.backSearchContinuityWithinRange(
                 testData,
-                testData.length - 1,
+                testData.length,
                 0,
                 1,
                 999,
@@ -374,7 +372,7 @@ class SwingSearchServiceTest {
 
         final int result = swingSearchService.backSearchContinuityWithinRange(
                 testData,
-                testData.length - 1,
+                testData.length,
                 0,
                 -999,
                 1,
@@ -391,7 +389,7 @@ class SwingSearchServiceTest {
 
         final int result = swingSearchService.backSearchContinuityWithinRange(
                 testData,
-                testData.length - 1,
+                testData.length,
                 0,
                 1.1,
                 999,
@@ -408,7 +406,7 @@ class SwingSearchServiceTest {
 
         final int result = swingSearchService.backSearchContinuityWithinRange(
                 testData,
-                testData.length - 1,
+                testData.length,
                 0,
                 -999,
                 1.1,
@@ -425,7 +423,7 @@ class SwingSearchServiceTest {
 
         final int result = swingSearchService.backSearchContinuityWithinRange(
                 testData,
-                testData.length - 1,
+                testData.length,
                 0,
                 999,
                 1000,
@@ -442,7 +440,7 @@ class SwingSearchServiceTest {
 
         final int result = swingSearchService.backSearchContinuityWithinRange(
                 testData,
-                testData.length - 1,
+                testData.length,
                 0,
                 0,
                 999,
@@ -475,7 +473,7 @@ class SwingSearchServiceTest {
         final double[] testData = testSwing.getAcceleratorXData();
 
         assertThrows(
-                InvalidThresholdsException.class,
+                InvalidInputException.class,
                 () ->
                         swingSearchService.backSearchContinuityWithinRange(
                                 testData,
@@ -648,7 +646,7 @@ class SwingSearchServiceTest {
         final int[][] result = swingSearchService.searchMultiContinuityWithinRange(
                 testData,
                 0,
-                22,
+                23,
                 0,
                 999,
                 1
@@ -665,7 +663,7 @@ class SwingSearchServiceTest {
         final int[][] result = swingSearchService.searchMultiContinuityWithinRange(
                 testData,
                 0,
-                6,
+                7,
                 -1,
                 999,
                 1
@@ -682,7 +680,7 @@ class SwingSearchServiceTest {
         final int[][] result = swingSearchService.searchMultiContinuityWithinRange(
                 testData,
                 0,
-                39,
+                40,
                 1,
                 999,
                 1
@@ -699,7 +697,7 @@ class SwingSearchServiceTest {
         final int[][] result = swingSearchService.searchMultiContinuityWithinRange(
                 testData,
                 0,
-                41,
+                42,
                 1.1,
                 999,
                 1
@@ -716,7 +714,7 @@ class SwingSearchServiceTest {
         final int[][] result = swingSearchService.searchMultiContinuityWithinRange(
                 testData,
                 0,
-                testData.length - 1,
+                testData.length,
                 999,
                 999,
                 1
@@ -733,7 +731,7 @@ class SwingSearchServiceTest {
         final int[][] result = swingSearchService.searchMultiContinuityWithinRange(
                 testData,
                 0,
-                31,
+                32,
                 0,
                 999,
                 10
