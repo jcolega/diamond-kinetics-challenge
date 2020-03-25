@@ -287,8 +287,8 @@ class SwingSearchServiceTest {
 
         final int result = swingSearchService.backSearchContinuityWithinRange(
                 testData,
-                testData.length,
-                0,
+                testData.length - 1,
+                -1,
                 0,
                 999,
                 1
@@ -304,8 +304,8 @@ class SwingSearchServiceTest {
 
         final int result = swingSearchService.backSearchContinuityWithinRange(
                 testData,
-                testData.length,
-                0,
+                testData.length - 1,
+                -1,
                 -999,
                 0,
                 1
@@ -321,8 +321,8 @@ class SwingSearchServiceTest {
 
         final int result = swingSearchService.backSearchContinuityWithinRange(
                 testData,
-                testData.length,
-                0,
+                testData.length - 1,
+                -1,
                 -1,
                 999,
                 1
@@ -338,8 +338,8 @@ class SwingSearchServiceTest {
 
         final int result = swingSearchService.backSearchContinuityWithinRange(
                 testData,
-                testData.length,
-                0,
+                testData.length - 1,
+                -1,
                 -999,
                 -1,
                 1
@@ -355,8 +355,8 @@ class SwingSearchServiceTest {
 
         final int result = swingSearchService.backSearchContinuityWithinRange(
                 testData,
-                testData.length,
-                0,
+                testData.length - 1,
+                -1,
                 1,
                 999,
                 1
@@ -372,8 +372,8 @@ class SwingSearchServiceTest {
 
         final int result = swingSearchService.backSearchContinuityWithinRange(
                 testData,
-                testData.length,
-                0,
+                testData.length - 1,
+                -1,
                 -999,
                 1,
                 1
@@ -389,8 +389,8 @@ class SwingSearchServiceTest {
 
         final int result = swingSearchService.backSearchContinuityWithinRange(
                 testData,
-                testData.length,
-                0,
+                testData.length - 1,
+                -1,
                 1.1,
                 999,
                 1
@@ -406,8 +406,8 @@ class SwingSearchServiceTest {
 
         final int result = swingSearchService.backSearchContinuityWithinRange(
                 testData,
-                testData.length,
-                0,
+                testData.length - 1,
+                -1,
                 -999,
                 1.1,
                 1
@@ -423,8 +423,8 @@ class SwingSearchServiceTest {
 
         final int result = swingSearchService.backSearchContinuityWithinRange(
                 testData,
-                testData.length,
-                0,
+                testData.length - 1,
+                -1,
                 999,
                 1000,
                 1
@@ -440,8 +440,8 @@ class SwingSearchServiceTest {
 
         final int result = swingSearchService.backSearchContinuityWithinRange(
                 testData,
-                testData.length,
-                0,
+                testData.length - 1,
+                -1,
                 0,
                 999,
                 1

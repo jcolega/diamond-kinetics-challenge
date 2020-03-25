@@ -2,7 +2,8 @@ package com.colega.jake.diamondkineticschallenge.services;
 
 import com.colega.jake.diamondkineticschallenge.exceptions.InvalidInputException;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.RealMatrix;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,30 +18,31 @@ public class SwingSearchService {
             final int winLength
     ) {
 
-        final double[][] standardizedData = new double[][]{data};
-        final double[] standardizedThresholdLo = new double[]{threshold};
-        final double[] standardizedThresholdHi = new double[]{Double.MAX_VALUE};
+        final RealMatrix dataMatrix = new Array2DRowRealMatrix(new double[][]{data});
 
         // All problems now captured and thrown
         invalidInputTest(
-                standardizedData,
+                dataMatrix,
                 indexBegin,
                 indexEnd,
-                standardizedThresholdLo,
-                standardizedThresholdHi,
-                winLength
+                new double[]{threshold},
+                new double[]{Double.MAX_VALUE},
+                winLength,
+                true
         );
 
         final List<Integer> results = search(
-                standardizedData,
+                dataMatrix,
                 indexBegin,
                 indexEnd,
-                standardizedThresholdLo,
-                standardizedThresholdHi,
-                winLength
+                winLength,
+                (final double[] values) ->
+                        values[0] > threshold,
+                1,
+                true
         );
 
-        if (results.size() > 0) {
+        if (CollectionUtils.isNotEmpty(results)) {
             return results.get(0);
         } else {
             return -1;
@@ -56,31 +58,32 @@ public class SwingSearchService {
             final int winLength
     ) {
 
-        final double[][] standardizedData = new double[][]{data};
-        final double[] standardizedThresholdLo = new double[]{thresholdLo};
-        final double[] standardizedThresholdHi = new double[]{thresholdHi};
+        final RealMatrix dataMatrix = new Array2DRowRealMatrix(new double[][]{data});
 
         // All problems now captured and thrown
         invalidInputTest(
-                standardizedData,
-                indexEnd,
+                dataMatrix,
                 indexBegin,
-                standardizedThresholdLo,
-                standardizedThresholdHi,
-                winLength
+                indexEnd,
+                new double[]{thresholdLo},
+                new double[]{thresholdHi},
+                winLength,
+                false
         );
 
         final List<Integer> results = search(
-                standardizedData,
-                indexEnd,
+                dataMatrix,
                 indexBegin,
-                standardizedThresholdLo,
-                standardizedThresholdHi,
-                winLength
+                indexEnd,
+                winLength,
+                (final double[] values) ->
+                        values[0] > thresholdLo && values[0] < thresholdHi,
+                1,
+                false
         );
 
-        if (results.size() > 0) {
-            return results.get(results.size() - 1);
+        if (CollectionUtils.isNotEmpty(results)) {
+            return results.get(0);
         } else {
             return -1;
         }
@@ -96,30 +99,31 @@ public class SwingSearchService {
             final int winLength
     ) {
 
-        final double[][] standardizedData = new double[][]{data1, data2};
-        final double[] standardizedThresholdLo = new double[]{threshold1, threshold2};
-        final double[] standardizedThresholdHi = new double[]{Double.MAX_VALUE, Double.MAX_VALUE};
+        final RealMatrix dataMatrix = new Array2DRowRealMatrix(new double[][]{data1, data2});
 
         // All problems now captured and thrown
         invalidInputTest(
-                standardizedData,
+                dataMatrix,
                 indexBegin,
                 indexEnd,
-                standardizedThresholdLo,
-                standardizedThresholdHi,
-                winLength
+                new double[]{threshold1, threshold2},
+                new double[]{Double.MAX_VALUE, Double.MAX_VALUE},
+                winLength,
+                true
         );
 
         final List<Integer> results = search(
-                standardizedData,
+                dataMatrix,
                 indexBegin,
                 indexEnd,
-                standardizedThresholdLo,
-                standardizedThresholdHi,
-                winLength
+                winLength,
+                (final double[] values) ->
+                        values[0] > threshold1 && values[1] > threshold2,
+                1,
+                true
         );
 
-        if (results.size() > 0) {
+        if (CollectionUtils.isNotEmpty(results)) {
             return results.get(0);
         } else {
             return -1;
@@ -135,27 +139,28 @@ public class SwingSearchService {
             final int winLength
     ) {
 
-        final double[][] standardizedData = new double[][]{data};
-        final double[] standardizedThresholdLo = new double[]{thresholdLo};
-        final double[] standardizedThresholdHi = new double[]{thresholdHi};
+        final RealMatrix dataMatrix = new Array2DRowRealMatrix(new double[][]{data});
 
         // All problems now captured and thrown
         invalidInputTest(
-                standardizedData,
+                dataMatrix,
                 indexBegin,
                 indexEnd,
-                standardizedThresholdLo,
-                standardizedThresholdHi,
-                winLength
+                new double[]{thresholdLo},
+                new double[]{thresholdHi},
+                winLength,
+                true
         );
 
         final List<Integer> results = search(
-                standardizedData,
+                dataMatrix,
                 indexBegin,
                 indexEnd,
-                standardizedThresholdLo,
-                standardizedThresholdHi,
-                winLength
+                winLength,
+                (final double[] values) ->
+                        values[0] > thresholdLo && values[0] < thresholdHi,
+                indexEnd - indexBegin + 1, // impossible number to reach to ensure we get all matches
+                true
         );
 
         int[][] returnValue = new int[results.size()][2];
@@ -168,31 +173,23 @@ public class SwingSearchService {
 
     // Common search method implemented
     private List<Integer> search(
-            final double[][] data,
+            final RealMatrix data,
             final int indexBegin,
             final int indexEnd,
-            final double[] thresholdLo,
-            final double[] thresholdHi,
-            final int winLength
+            final int winLength,
+            final CheckIndex checkIndex,
+            final int maxNumMatches,
+            final boolean forwardSearch
     ) {
 
         final List<Integer> potentialIndices = new ArrayList<>();
         final List<Integer> satisfactoryIndices = new ArrayList<>();
 
         // Moved to exclusive indexEnd
-        for (int i = indexBegin; i < indexEnd; i++) {
+        int i = indexBegin;
+        while ((forwardSearch && i < indexEnd) || (!forwardSearch && i > indexEnd)) {
 
-            final MutableBoolean allSuccessful = new MutableBoolean(true);
-
-            for (int j = 0; j < data.length; j++) {
-
-                if (data[j][i] <= thresholdLo[j] || data[j][i] >= thresholdHi[j]) {
-                    allSuccessful.setFalse();
-                    break;
-                }
-            }
-
-            if (allSuccessful.isTrue()) {
+            if (checkIndex.test(data.getColumn(i))) {
 
                 potentialIndices.add(i);
 
@@ -202,46 +199,61 @@ public class SwingSearchService {
             } else {
                 potentialIndices.clear();
             }
+
+            if (satisfactoryIndices.size() == maxNumMatches) {
+                break;
+            }
+
+            i += forwardSearch ? 1 : -1;
         }
 
         return satisfactoryIndices;
     }
 
+
+    private interface CheckIndex {
+        boolean test(final double[] values);
+    }
+
     private void invalidInputTest(
-            final double[][] data,
+            final RealMatrix data,
             final int indexBegin,
             final int indexEnd,
-            final double[] thresholdLo,
-            final double[] thresholdHi,
-            final int winLength
+            final double[] thresholdLos,
+            final double[] thresholdHis,
+            final int winLength,
+            final boolean forwardSearch
     ) {
 
         final List<String> problems = new ArrayList<>();
-        for (int i = 0; i < data.length; i++) {
-            problems.addAll(invalidIndicesTest(indexBegin, indexEnd, data[i].length));
-            problems.addAll(invalidWinLengthTest(winLength, data[i].length));
+        for (int i = 0; i < data.getRowDimension(); i++) {
+            problems.addAll(invalidIndicesTest(indexBegin, indexEnd, data.getRow(i).length, forwardSearch));
+            problems.addAll(invalidWinLengthTest(winLength, data.getRow(i).length));
         }
-        int thresholdLength = thresholdLo.length;
-        if (thresholdLo.length != thresholdHi.length) {
-            problems.add("Unequal number of thresholdLo (" + thresholdLo.length + ") and thresholdHi (" + thresholdHi.length + ") provided");
-            thresholdLength = Integer.min(thresholdLo.length, thresholdHi.length);
+
+        int thresholdLength = Integer.min(thresholdLos.length, thresholdHis.length);
+        if (thresholdLos.length != data.getRowDimension()) {
+            problems.add("Unequal number of thresholdLo (" + thresholdLos.length + ") and data (" + data.getRowDimension() + ") provided");
         }
-        if (thresholdLo.length != data.length) {
-            problems.add("Unequal number of thresholdLo (" + thresholdLo.length + ") and data (" + data.length + ") provided");
-        }
-        if (thresholdHi.length != data.length) {
-            problems.add("Unequal number of thresholdHi (" + thresholdHi.length + ") and data (" + data.length + ") provided");
+        if (thresholdHis.length != data.getRowDimension()) {
+            problems.add("Unequal number of thresholdHi (" + thresholdHis.length + ") and data (" + data.getRowDimension() + ") provided");
         }
         for (int i = 0; i < thresholdLength; i++) {
-            problems.addAll(invalidThresholdsTest(thresholdLo[i], thresholdHi[i]));
+            problems.addAll(invalidThresholdsTest(thresholdLos[i], thresholdHis[i]));
         }
+
 
         if (CollectionUtils.isNotEmpty(problems)) {
             throw new InvalidInputException(problems.toString());
         }
     }
 
-    private List<String> invalidIndicesTest(final int indexBegin, final int indexEnd, final int dataLength) {
+    private List<String> invalidIndicesTest(
+            final int indexBegin,
+            final int indexEnd,
+            final int dataLength,
+            final boolean forwardSearch
+    ) {
 
         final List<String> problems = new ArrayList<>();
         if (indexBegin < 0) {
@@ -250,14 +262,14 @@ public class SwingSearchService {
         if (indexBegin > dataLength) {
             problems.add("indexBegin (" + indexBegin + ") is too large for number of data provided (" + dataLength + ")");
         }
-        if (indexEnd < 0) {
+        if ((forwardSearch && indexEnd < 0) || (!forwardSearch && indexEnd < -1)) {
             problems.add("indexEnd (" + indexEnd + ") is negative");
         }
         if (indexEnd > dataLength) {
             problems.add("indexEnd (" + indexEnd + ") is too large for number of data provided (" + dataLength + ")");
         }
-        if (indexBegin > indexEnd) {
-            problems.add("indexBegin (" + indexBegin + ") is greater than indexEnd (" + indexEnd + ")");
+        if ((forwardSearch && indexBegin > indexEnd - 1) || (!forwardSearch && indexBegin < indexEnd + 1)) {
+            problems.add("indexBegin (" + indexBegin + ") is greater than or equal to indexEnd (" + indexEnd + ")");
         }
 
         return problems;
