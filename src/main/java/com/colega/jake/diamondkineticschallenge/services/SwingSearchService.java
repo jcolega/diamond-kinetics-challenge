@@ -32,22 +32,15 @@ public class SwingSearchService {
                 true
         );
 
-        final List<Integer> results = search(
+        return search(
                 dataMatrix,
                 indexBegin,
                 indexEnd,
                 winLength,
                 (final double[] values) ->
                         values[0] > threshold,
-                1,
                 true
         );
-
-        if (CollectionUtils.isNotEmpty(results)) {
-            return results.get(0);
-        } else {
-            return -1;
-        }
     }
 
     public int backSearchContinuityWithinRange(
@@ -72,22 +65,15 @@ public class SwingSearchService {
                 false
         );
 
-        final List<Integer> results = search(
+        return search(
                 dataMatrix,
                 indexBegin,
                 indexEnd,
                 winLength,
                 (final double[] values) ->
                         values[0] > thresholdLo && values[0] < thresholdHi,
-                1,
                 false
         );
-
-        if (CollectionUtils.isNotEmpty(results)) {
-            return results.get(0);
-        } else {
-            return -1;
-        }
     }
 
     public int searchContinuityAboveValueTwoSignals(
@@ -113,22 +99,15 @@ public class SwingSearchService {
                 true
         );
 
-        final List<Integer> results = search(
+        return search(
                 dataMatrix,
                 indexBegin,
                 indexEnd,
                 winLength,
                 (final double[] values) ->
                         values[0] > threshold1 && values[1] > threshold2,
-                1,
                 true
         );
-
-        if (CollectionUtils.isNotEmpty(results)) {
-            return results.get(0);
-        } else {
-            return -1;
-        }
     }
 
     public int[][] searchMultiContinuityWithinRange(
@@ -153,16 +132,27 @@ public class SwingSearchService {
                 true
         );
 
-        final List<Integer> results = search(
-                dataMatrix,
-                indexBegin,
-                indexEnd,
-                winLength,
-                (final double[] values) ->
-                        values[0] > thresholdLo && values[0] < thresholdHi,
-                indexEnd - indexBegin + 1, // impossible number to reach to ensure we get all matches
-                true
-        );
+        final List<Integer> results = new ArrayList<>();
+        int currentIndex = indexBegin;
+        while (indexEnd - currentIndex >= winLength) {
+
+            final int result = search(
+                    dataMatrix,
+                    currentIndex,
+                    indexEnd,
+                    winLength,
+                    (final double[] values) ->
+                            values[0] > thresholdLo && values[0] < thresholdHi,
+                    true
+            );
+
+            if (result != -1) {
+                results.add(result);
+                currentIndex = result + 1;
+            } else {
+                break;
+            }
+        }
 
         int[][] returnValue = new int[results.size()][2];
         for (int i = 0; i < results.size(); i++) {
@@ -173,18 +163,17 @@ public class SwingSearchService {
     }
 
     // Common search method implemented
-    private List<Integer> search(
+    private int search(
             final RealMatrix data,
             final int indexBegin,
             final int indexEnd,
             final int winLength,
             final Predicate<double[]> indexTest,
-            final int maxNumMatches,
             final boolean forwardSearch
     ) {
 
-        final List<Integer> potentialIndices = new ArrayList<>();
-        final List<Integer> satisfactoryIndices = new ArrayList<>();
+        int currentIndex = -1;
+        int currentLength = 0;
 
         // Moved to exclusive indexEnd
         int i = indexBegin;
@@ -192,23 +181,23 @@ public class SwingSearchService {
 
             if (indexTest.evaluate(data.getColumn(i))) {
 
-                potentialIndices.add(i);
+                if (currentLength == 0) {
+                    currentIndex = i;
+                }
 
-                if (CollectionUtils.isNotEmpty(potentialIndices) && i - potentialIndices.get(0) + 1 == winLength) {
-                    satisfactoryIndices.add(potentialIndices.remove(0));
+                currentLength++;
+
+                if (currentLength == winLength) {
+                    return currentIndex;
                 }
             } else {
-                potentialIndices.clear();
-            }
-
-            if (satisfactoryIndices.size() == maxNumMatches) {
-                break;
+                currentLength = 0;
             }
 
             i += forwardSearch ? 1 : -1;
         }
 
-        return satisfactoryIndices;
+        return -1;
     }
 
     private void invalidInputTest(
