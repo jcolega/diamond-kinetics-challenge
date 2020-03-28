@@ -2,6 +2,7 @@ package com.colega.jake.diamondkineticschallenge.services;
 
 import com.colega.jake.diamondkineticschallenge.exceptions.InvalidInputException;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.Predicate;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
@@ -177,7 +178,7 @@ public class SwingSearchService {
             final int indexBegin,
             final int indexEnd,
             final int winLength,
-            final CheckIndex checkIndex,
+            final Predicate<double[]> indexTest,
             final int maxNumMatches,
             final boolean forwardSearch
     ) {
@@ -189,7 +190,7 @@ public class SwingSearchService {
         int i = indexBegin;
         while ((forwardSearch && i < indexEnd) || (!forwardSearch && i > indexEnd)) {
 
-            if (checkIndex.test(data.getColumn(i))) {
+            if (indexTest.evaluate(data.getColumn(i))) {
 
                 potentialIndices.add(i);
 
@@ -208,11 +209,6 @@ public class SwingSearchService {
         }
 
         return satisfactoryIndices;
-    }
-
-
-    private interface CheckIndex {
-        boolean test(final double[] values);
     }
 
     private void invalidInputTest(
